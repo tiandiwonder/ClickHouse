@@ -912,7 +912,7 @@ bool StorageObjectStorageQueue::streamToViews(size_t streaming_tasks_index, UInt
     auto insert = make_intrusive<ASTInsertQuery>();
     insert->table_id = table_id;
 
-    const auto metadata_snapshot = getInMemoryMetadataPtr(getContext(), false);
+    const auto metadata_snapshot = getInMemoryMetadataUncached(getContext());
     auto storage_snapshot = getStorageSnapshot(metadata_snapshot, getContext());
     auto queue_context = Context::createCopy(getContext());
     queue_context->makeQueryContext();
@@ -1416,7 +1416,7 @@ void StorageObjectStorageQueue::checkAlterIsPossible(const AlterCommands & comma
         }
     }
 
-    auto metadata_snapshot = getInMemoryMetadataPtr(local_context, false);
+    auto metadata_snapshot = getInMemoryMetadataQueryCached(local_context);
     StorageInMemoryMetadata old_metadata(*metadata_snapshot); /// NOLINT
     SettingsChanges * old_settings = nullptr;
     if (old_metadata.settings_changes)
@@ -1490,7 +1490,7 @@ void StorageObjectStorageQueue::alter(
         auto table_id = getStorageID();
         auto alter_commands = normalizeAlterCommands(commands);
 
-        auto metadata_snapshot = getInMemoryMetadataPtr(local_context, false);
+        auto metadata_snapshot = getInMemoryMetadataQueryCached(local_context);
         StorageInMemoryMetadata old_metadata(*metadata_snapshot); /// NOLINT
         SettingsChanges * old_settings = nullptr;
         if (old_metadata.settings_changes)
@@ -1719,7 +1719,7 @@ StorageObjectStorageQueue::createFileIterator(ContextPtr local_context, const Ac
         enable_hash_ring_filtering_copy = enable_hash_ring_filtering;
     }
 
-    auto metadata_snapshot = getInMemoryMetadataPtr(local_context, false);
+    auto metadata_snapshot = getInMemoryMetadataQueryCached(local_context);
     return std::make_shared<FileIterator>(
         files_metadata,
         object_storage,
