@@ -17,11 +17,14 @@ import os
 import socket
 import subprocess
 
-HOST = os.environ["CLICKHOUSE_HOST"]
-PORT = int(os.environ["CLICKHOUSE_PORT_TCP"])
-DATABASE = os.environ["CLICKHOUSE_DATABASE"]
+# `clickhouse-test` exports CLICKHOUSE_BINARY and CLICKHOUSE_DATABASE, but not the host and port -
+# those come from the environment the suite was started in, and `shell_config.sh`, which supplies
+# them, is only sourced by the `.sh` tests. Hence the defaults, as in the other `.py` tests here.
+HOST = os.environ.get("CLICKHOUSE_HOST", "127.0.0.1")
+PORT = int(os.environ.get("CLICKHOUSE_PORT_TCP", 9000))
+DATABASE = os.environ.get("CLICKHOUSE_DATABASE", "default")
 CLIENT = [
-    os.environ["CLICKHOUSE_BINARY"],
+    os.environ.get("CLICKHOUSE_BINARY", "clickhouse"),
     "client",
     "--host",
     HOST,
